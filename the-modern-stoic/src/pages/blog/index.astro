@@ -5,7 +5,7 @@ export const prerender = false;
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { brandConfig } from '@/config/brand.config';
-import { getPublishedPosts, getPostSlug } from '@/lib/posts';
+import { getPublishedPosts, getPostSlug, getPostCoverUrl } from '@/lib/posts';
 
 const allPosts = await getPublishedPosts();
 
@@ -64,20 +64,26 @@ function pageHref(targetPage: number): string {
       </nav>
     )}
 
-    <ul class="mt-10 flex flex-col gap-8">
+    <ul class="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       {paginatedPosts.length === 0 && (
         <p class="text-sm text-foreground/60">No essays found.</p>
       )}
-      {paginatedPosts.map((post) => (
-        <li>
-          <a href={`/blog/${getPostSlug(post)}`} class="group block">
-            <h2 class="text-xl font-medium group-hover:underline">
-              {post.data.properties.Title}
-            </h2>
-            <p class="mt-2 text-sm text-foreground/70">{post.data.properties.Excerpt}</p>
-          </a>
-        </li>
-      ))}
+      {paginatedPosts.map((post) => {
+        const coverUrl = getPostCoverUrl(post);
+        return (
+          <li>
+            <a href={`/blog/${getPostSlug(post)}`} class="group block">
+              {coverUrl && (
+                <img src={coverUrl} alt={post.data.properties.Title} class="mb-4 w-full rounded-md object-cover aspect-video" />
+              )}
+              <h2 class="text-xl font-medium group-hover:underline">
+                {post.data.properties.Title}
+              </h2>
+              <p class="mt-2 text-sm text-foreground/70">{post.data.properties.Excerpt}</p>
+            </a>
+          </li>
+        );
+      })}
     </ul>
 
     {totalPages > 1 && (

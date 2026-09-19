@@ -1,5 +1,6 @@
 export interface BrandConfig {
   brandName: string;
+  logo: string;
   tagline: string;
   domain: string;
   storeUrl: string;
@@ -58,6 +59,7 @@ export interface BrandConfig {
  */
 export const brandConfig: BrandConfig = {
   brandName: "The Modern Stoic",
+  logo: "/logo.png",
   tagline: "Ancient Wisdom for Modern Era",
   domain: "themodernstoic.co",
   storeUrl: "https://store.themodernstoic.co",
@@ -103,3 +105,4 @@ export const brandConfig: BrandConfig = {
     defaultOgImage: "/og-image.png"
   }
 };
+

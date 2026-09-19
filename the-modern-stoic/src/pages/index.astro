@@ -2,7 +2,7 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import NewsletterForm from '@/components/NewsletterForm.astro';
 import { brandConfig } from '@/config/brand.config';
-import { getPublishedPosts, getPostSlug } from '@/lib/posts';
+import { getPublishedPosts, getPostSlug, getPostCoverUrl } from '@/lib/posts';
 
 const posts = (await getPublishedPosts()).slice(0, 5);
 
@@ -45,17 +45,23 @@ const jsonLd = [
         No essays published yet — connect your Notion database to see them here.
       </p>
     )}
-    <ul class="flex flex-col gap-6">
-      {posts.map((post) => (
-        <li>
-          <a href={`/blog/${getPostSlug(post)}`} class="group block">
-            <h3 class="text-lg font-medium group-hover:underline">
-              {post.data.properties.Title}
-            </h3>
-            <p class="mt-1 text-sm text-foreground/70">{post.data.properties.Excerpt}</p>
-          </a>
-        </li>
-      ))}
+    <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {posts.map((post) => {
+        const coverUrl = getPostCoverUrl(post);
+        return (
+          <li>
+            <a href={`/blog/${getPostSlug(post)}`} class="group block">
+              {coverUrl && (
+                <img src={coverUrl} alt={post.data.properties.Title} class="mb-3 w-full rounded-md object-cover aspect-video" />
+              )}
+              <h3 class="text-lg font-medium group-hover:underline">
+                {post.data.properties.Title}
+              </h3>
+              <p class="mt-1 text-sm text-foreground/70">{post.data.properties.Excerpt}</p>
+            </a>
+          </li>
+        );
+      })}
     </ul>
   </section>
 </BaseLayout>

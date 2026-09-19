@@ -58,6 +58,9 @@ const jsonLd = [
         </time>
       )}
     </header>
+    {coverUrl && (
+      <img src={coverUrl} alt={Title} class="mb-8 w-full rounded-md object-cover aspect-video" />
+    )}
     <div class="prose prose-neutral max-w-none">
       <Content />
     </div>
