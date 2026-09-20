@@ -12,36 +12,83 @@ const coreLinks = [
 ];
 
 const topbarPages = await getNavPages('topbar');
+
+const currentPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
+
+function isActive(href: string): boolean {
+  if (href === '/') return currentPath === '/';
+  return currentPath === href || currentPath.startsWith(`${href}/`);
+}
+
+const navLinks = [
+  ...coreLinks,
+  ...topbarPages.map((page) => ({
+    href: `/${page.data.properties.Slug}`,
+    label: page.data.properties.Title,
+  })),
+];
+
+const linkClass =
+  'eyebrow border-b-2 pb-1 transition-colors duration-200 hover:text-brand';
 ---
 
-<header class="border-b border-border">
-  <div class="mx-auto flex max-w-4xl items-center justify-between px-6 py-5">
-    <!--<a href="/" class="font-heading text-lg font-semibold tracking-tight">
-      {brandConfig.brandName}
-    </a>-->
-    <a href="/" class="font-heading text-lg font-semibold tracking-tight">
-      <img src={brandConfig.logo} alt={`${brandConfig.brandName} + Logo`} width="50%">
+<header class="border-b border-border bg-background">
+  <div class="mx-auto flex max-w-grid items-center justify-between gap-6 px-6 py-6">
+    <a href="/" class="shrink-0" aria-label={`${brandConfig.brandName} — home`}>
+      <img src={brandConfig.logo} alt={brandConfig.brandName} class="h-9 w-auto" />
     </a>
-    <nav class="flex items-center gap-6 text-sm">
-      {coreLinks.map((link) => (
-        <a href={link.href} class="text-foreground/80 transition-colors hover:text-foreground">
-          {link.label}
-        </a>
-      ))}
-      {topbarPages.map((page) => (
+
+    <!-- Desktop nav -->
+    <nav class="hidden items-center gap-8 md:flex" aria-label="Main">
+      {navLinks.map((link) => (
         <a
-          href={`/${page.data.properties.Slug}`}
-          class="text-foreground/80 transition-colors hover:text-foreground"
+          href={link.href}
+          aria-current={isActive(link.href) ? 'page' : undefined}
+          class:list={[
+            linkClass,
+            isActive(link.href)
+              ? 'border-brand-soft text-brand'
+              : 'border-transparent text-muted-foreground',
+          ]}
         >
-          {page.data.properties.Title}
+          {link.label}
         </a>
       ))}
       <a
         href={brandConfig.storeUrl}
-        class="text-foreground/80 transition-colors hover:text-foreground"
+        class:list={[linkClass, 'border-transparent text-muted-foreground']}
       >
         Store
       </a>
     </nav>
+
+    <!-- Mobile nav: CSS-only disclosure, no JS island needed. -->
+    <details class="relative md:hidden">
+      <summary
+        class="eyebrow flex cursor-pointer list-none items-center gap-2 text-foreground marker:content-none [&::-webkit-details-marker]:hidden"
+      >
+        Menu
+      </summary>
+      <nav
+        class="absolute right-0 z-50 mt-4 flex w-52 flex-col gap-4 rounded-md border border-border bg-surface p-5 shadow-lg shadow-black/5"
+        aria-label="Main"
+      >
+        {navLinks.map((link) => (
+          <a
+            href={link.href}
+            aria-current={isActive(link.href) ? 'page' : undefined}
+            class:list={[
+              'eyebrow transition-colors hover:text-brand',
+              isActive(link.href) ? 'text-brand' : 'text-muted-foreground',
+            ]}
+          >
+            {link.label}
+          </a>
+        ))}
+        <a href={brandConfig.storeUrl} class="eyebrow text-muted-foreground hover:text-brand">
+          Store
+        </a>
+      </nav>
+    </details>
   </div>
 </header>

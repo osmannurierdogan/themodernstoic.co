@@ -18,7 +18,7 @@ const { gtmId, ga4Id, metaPixelId } = brandConfig.analytics;
   `} />
 )}
 
-{ga4Id && !gtmId && (
+{ga4Id && (
   <>
     <script is:inline src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}></script>
     <script is:inline set:html={`

@@ -1,9 +1,16 @@
 ---
 import { brandConfig } from '@/config/brand.config';
 import NewsletterFormIsland from '@/components/NewsletterForm.vue';
+
+interface Props {
+  tone?: 'paper' | 'ink';
+}
+
+const { tone = 'paper' } = Astro.props;
 ---
 
 <NewsletterFormIsland
   client:visible
+  tone={tone}
   beehiivPublicationId={brandConfig.newsletter.beehiivPublicationId}
 />

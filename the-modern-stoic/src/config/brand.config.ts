@@ -13,10 +13,24 @@ export interface BrandConfig {
       accent: string;
       background: string;
       text: string;
+      /** Cards and raised surfaces — sits lighter than `background`. */
+      surface: string;
+      /** Quiet section bands (footer, callouts). */
+      panel: string;
+      /** Inverted band background for high-contrast moments. */
+      ink: string;
+      border: string;
+      borderStrong: string;
+      /** Meta text, excerpts. Must clear 4.5:1 on `surface`. */
+      mutedText: string;
+      /** Decorative bronze — rules and dividers only, never text. */
+      accentSoft: string;
     };
     fonts: {
       heading: string;
       body: string;
+      /** Long-form article body. */
+      serifBody: string;
     };
     logoUrl: string;
     faviconUrl: string;
@@ -67,15 +81,23 @@ export const brandConfig: BrandConfig = {
 
   theme: {
     colors: {
-      primary: "#1c1c1a",
-      secondary: "#8a8478",
-      accent: "#b08d57",
-      background: "#faf9f6",
-      text: "#1c1c1a"
+      primary: "#1A1815",
+      secondary: "#6B6558",
+      accent: "#866438",
+      background: "#F7F5EF",
+      text: "#1A1815",
+      surface: "#FFFDF8",
+      panel: "#EFEBE0",
+      ink: "#1F1D19",
+      border: "#E0DACC",
+      borderStrong: "#C9C0AC",
+      mutedText: "#6B6558",
+      accentSoft: "#B08D57"
     },
     fonts: {
-      heading: "Fraunces",
-      body: "Inter"
+      heading: "Fraunces Variable",
+      body: "Inter",
+      serifBody: "Source Serif 4"
     },
     logoUrl: "/logo.svg",
     faviconUrl: "/favicon.svg"

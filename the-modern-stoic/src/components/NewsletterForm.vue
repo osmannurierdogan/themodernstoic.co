@@ -3,9 +3,14 @@ import { ref } from 'vue';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-const props = defineProps<{
-  beehiivPublicationId: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    beehiivPublicationId: string;
+    /** `ink` restyles the form for placement on the dark band. */
+    tone?: 'paper' | 'ink';
+  }>(),
+  { tone: 'paper' },
+);
 
 declare global {
   interface Window {
@@ -47,23 +52,58 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <form class="flex flex-col gap-3 sm:flex-row" @submit.prevent="handleSubmit">
-    <Input
-      v-model="email"
-      type="email"
-      required
-      placeholder="you@example.com"
-      aria-label="Email address"
-      :disabled="status === 'submitting' || status === 'success'"
-    />
-    <Button type="submit" :disabled="status === 'submitting' || status === 'success'">
-      {{ status === 'success' ? 'Subscribed' : 'Subscribe' }}
-    </Button>
-  </form>
-  <p v-if="status === 'error'" class="mt-2 text-sm text-destructive">
-    Something went wrong. Please try again.
-  </p>
-  <p v-if="status === 'success'" class="mt-2 text-sm text-foreground/70">
-    Thanks — check your inbox to confirm your subscription.
-  </p>
+  <div>
+    <form class="flex flex-col gap-3 sm:flex-row" @submit.prevent="handleSubmit">
+      <Input
+        v-model="email"
+        type="email"
+        required
+        placeholder="you@example.com"
+        aria-label="Email address"
+        :disabled="status === 'submitting' || status === 'success'"
+        :class="[
+          'h-12 flex-1 rounded-md px-4 text-base',
+          tone === 'ink'
+            ? 'border-white/20 bg-white/5 text-white placeholder:text-white/40 focus-visible:border-white/40'
+            : 'border-border bg-surface placeholder:text-muted-foreground/70',
+        ]"
+      />
+      <Button
+        type="submit"
+        :disabled="status === 'submitting' || status === 'success'"
+        :class="[
+          'eyebrow h-12 rounded-md px-7 transition-colors',
+          tone === 'ink'
+            ? 'bg-brand-soft text-ink hover:bg-brand-soft/85'
+            : 'bg-primary text-primary-foreground hover:bg-brand',
+        ]"
+      >
+        {{ status === 'submitting' ? 'Sending' : status === 'success' ? 'Subscribed' : 'Subscribe' }}
+      </Button>
+    </form>
+
+    <p
+      v-if="status === 'error'"
+      class="mt-3 text-sm"
+      :class="tone === 'ink' ? 'text-red-300' : 'text-destructive'"
+      role="alert"
+    >
+      Something went wrong. Please try again.
+    </p>
+    <p
+      v-else-if="status === 'success'"
+      class="mt-3 text-sm"
+      :class="tone === 'ink' ? 'text-white/70' : 'text-muted-foreground'"
+      role="status"
+    >
+      Thanks — check your inbox to confirm your subscription.
+    </p>
+    <p
+      v-else
+      class="mt-3 text-sm"
+      :class="tone === 'ink' ? 'text-white/50' : 'text-muted-foreground'"
+    >
+      No spam. Unsubscribe in one click.
+    </p>
+  </div>
 </template>

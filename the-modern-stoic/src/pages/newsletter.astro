@@ -2,17 +2,66 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import NewsletterForm from '@/components/NewsletterForm.astro';
 import { brandConfig } from '@/config/brand.config';
+
+const promises = [
+  {
+    title: 'One essay a week',
+    body: 'A single idea from Seneca, Epictetus or Marcus Aurelius, traced to where it lands in an ordinary modern week.',
+  },
+  {
+    title: 'Sources, not slogans',
+    body: 'Every claim points back to the text it came from, so you can read the original and disagree with me.',
+  },
+  {
+    title: 'Nothing else',
+    body: 'No daily quotes, no upsells, no reading list you will never finish. Unsubscribe in one click.',
+  },
+];
 ---
 
 <BaseLayout
   title="Newsletter"
   description={`Subscribe to ${brandConfig.brandName}'s newsletter.`}
 >
-  <section class="mx-auto max-w-xl px-6 py-20 text-center">
-    <h1 class="text-3xl font-semibold tracking-tight">Join the newsletter</h1>
-    <p class="mt-4 text-foreground/70">{brandConfig.tagline}</p>
-    <div class="mt-8">
-      <NewsletterForm />
+  <section class="mx-auto max-w-grid px-6 py-section lg:py-section-lg">
+    <div class="grid gap-16 lg:grid-cols-[1.1fr_1fr] lg:gap-24">
+      <div>
+        <p class="eyebrow text-brand">The Newsletter</p>
+        <h1 class="mt-6 font-heading text-h1 font-semibold lg:text-display">
+          Join the newsletter
+        </h1>
+        <p class="mt-7 max-w-lg text-lg leading-relaxed text-muted-foreground">
+          {brandConfig.tagline}. Written for people who would rather think
+          carefully once a week than be reminded of something daily.
+        </p>
+        <div class="mt-10 h-px w-24 bg-brand-soft"></div>
+
+        <dl class="mt-12 flex flex-col gap-8">
+          {promises.map((promise, index) => (
+            <div class="flex gap-5">
+              <span class="eyebrow shrink-0 pt-1 text-brand-soft" aria-hidden="true">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <div>
+                <dt class="font-heading text-h3 font-semibold">{promise.title}</dt>
+                <dd class="mt-2 text-muted-foreground">{promise.body}</dd>
+              </div>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div class="lg:pt-12">
+        <div class="rounded-md border border-border bg-surface p-8 lg:p-10">
+          <h2 class="font-heading text-h3 font-semibold">Subscribe</h2>
+          <p class="mt-3 text-sm leading-relaxed text-muted-foreground">
+            Free. Delivered weekly.
+          </p>
+          <div class="mt-7">
+            <NewsletterForm />
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 </BaseLayout>

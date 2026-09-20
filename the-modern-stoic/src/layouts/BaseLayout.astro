@@ -2,8 +2,10 @@
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
-import '@fontsource/fraunces/500.css';
-import '@fontsource/fraunces/600.css';
+import '@fontsource-variable/fraunces';
+import '@fontsource/source-serif-4/400.css';
+import '@fontsource/source-serif-4/400-italic.css';
+import '@fontsource/source-serif-4/600.css';
 import '@/styles/global.css';
 import { brandConfig } from '@/config/brand.config';
 import SEO from '@/components/SEO.astro';
@@ -23,15 +25,42 @@ interface Props {
 const { title, description, ogImage, jsonLd, noindex } = Astro.props;
 const { colors, fonts } = brandConfig.theme;
 
+// Every shadcn token is assigned here, not just a handful. Anything left out
+// falls back to shadcn's neutral-gray defaults in global.css and renders cold
+// gray against the warm paper background.
+//
+// Note `--accent` keeps its shadcn meaning (a subtle hover surface) rather than
+// holding the bronze; the brand accent lives on `--brand-accent` so that ghost
+// buttons and menu items don't pick up a bronze background.
 const brandStyles = `:root {
-  --primary: ${colors.primary};
-  --primary-foreground: ${colors.background};
-  --secondary: ${colors.secondary};
-  --accent: ${colors.accent};
   --background: ${colors.background};
   --foreground: ${colors.text};
+  --surface: ${colors.surface};
+  --panel: ${colors.panel};
+  --ink: ${colors.ink};
+  --brand-accent: ${colors.accent};
+  --brand-accent-soft: ${colors.accentSoft};
+
+  --primary: ${colors.primary};
+  --primary-foreground: ${colors.surface};
+  --secondary: ${colors.panel};
+  --secondary-foreground: ${colors.primary};
+  --accent: ${colors.panel};
+  --accent-foreground: ${colors.primary};
+  --muted: ${colors.panel};
+  --muted-foreground: ${colors.mutedText};
+  --card: ${colors.surface};
+  --card-foreground: ${colors.text};
+  --popover: ${colors.surface};
+  --popover-foreground: ${colors.text};
+  --border: ${colors.border};
+  --border-strong: ${colors.borderStrong};
+  --input: ${colors.border};
+  --ring: ${colors.accent};
+
   --brand-font-heading: '${fonts.heading}';
   --brand-font-body: '${fonts.body}';
+  --brand-font-serif-body: '${fonts.serifBody}';
 }`;
 ---
 
@@ -45,9 +74,9 @@ const brandStyles = `:root {
     <AnalyticsScripts />
     <style set:html={brandStyles} />
   </head>
-  <body>
+  <body class="flex min-h-screen flex-col">
     <Header />
-    <main>
+    <main class="flex-1">
       <slot />
     </main>
     <Footer />

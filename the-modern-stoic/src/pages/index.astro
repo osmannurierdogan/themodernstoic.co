@@ -1,10 +1,11 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import NewsletterForm from '@/components/NewsletterForm.astro';
+import PostCard from '@/components/PostCard.astro';
 import { brandConfig } from '@/config/brand.config';
-import { getPublishedPosts, getPostSlug, getPostCoverUrl } from '@/lib/posts';
+import { getPublishedPosts } from '@/lib/posts';
 
-const posts = (await getPublishedPosts()).slice(0, 5);
+const posts = (await getPublishedPosts()).slice(0, 6);
 
 const jsonLd = [
   {
@@ -30,38 +31,60 @@ const jsonLd = [
 ---
 
 <BaseLayout title={brandConfig.brandName} description={brandConfig.tagline} jsonLd={jsonLd}>
-  <section class="mx-auto max-w-4xl px-6 py-20 text-center">
-    <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">{brandConfig.brandName}</h1>
-    <p class="mx-auto mt-4 max-w-xl text-lg text-foreground/70">{brandConfig.tagline}</p>
-    <div class="mx-auto mt-8 max-w-sm">
-      <NewsletterForm />
+  <!-- Hero -->
+  <section class="mx-auto max-w-grid px-6 pt-section pb-20 lg:pt-section-lg">
+    <div class="max-w-3xl">
+      <p class="eyebrow text-brand">Est. Stoa &middot; Practised Today</p>
+      <h1 class="mt-6 font-heading text-h1 font-semibold text-foreground lg:text-display">
+        {brandConfig.tagline}
+      </h1>
+      <p class="mt-7 max-w-xl text-lg leading-relaxed text-muted-foreground">
+        Essays on the Stoics and what their discipline asks of us now — read slowly,
+        one idea at a time.
+      </p>
+      <div class="mt-10 h-px w-24 bg-brand-soft"></div>
     </div>
   </section>
 
-  <section class="mx-auto max-w-4xl px-6 pb-20">
-    <h2 class="mb-6 text-xl font-semibold">Latest essays</h2>
-    {posts.length === 0 && (
-      <p class="text-sm text-foreground/60">
+  <!-- Latest essays -->
+  <section class="mx-auto max-w-grid px-6 pb-section lg:pb-section-lg">
+    <div class="mb-10 flex items-end justify-between gap-6 border-b border-border pb-5">
+      <h2 class="eyebrow text-foreground">Latest essays</h2>
+      <a href="/blog" class="eyebrow text-brand transition-opacity hover:opacity-70">
+        All essays &rarr;
+      </a>
+    </div>
+
+    {posts.length === 0 ? (
+      <p class="text-muted-foreground">
         No essays published yet — connect your Notion database to see them here.
       </p>
-    )}
-    <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {posts.map((post) => {
-        const coverUrl = getPostCoverUrl(post);
-        return (
-          <li>
-            <a href={`/blog/${getPostSlug(post)}`} class="group block">
-              {coverUrl && (
-                <img src={coverUrl} alt={post.data.properties.Title} class="mb-3 w-full rounded-md object-cover aspect-video" />
-              )}
-              <h3 class="text-lg font-medium group-hover:underline">
-                {post.data.properties.Title}
-              </h3>
-              <p class="mt-1 text-sm text-foreground/70">{post.data.properties.Excerpt}</p>
-            </a>
+    ) : (
+      <ul class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {posts.map((post) => (
+          <li class="h-full">
+            <PostCard post={post} />
           </li>
-        );
-      })}
-    </ul>
+        ))}
+      </ul>
+    )}
+  </section>
+
+  <!-- Newsletter: the one high-contrast moment on the page -->
+  <section class="bg-ink">
+    <div class="mx-auto max-w-grid px-6 py-section">
+      <div class="max-w-xl">
+        <p class="eyebrow text-brand-soft">The Newsletter</p>
+        <h2 class="mt-5 font-heading text-h2 font-semibold text-white">
+          One essay, every week.
+        </h2>
+        <p class="mt-4 text-white/60">
+          Ancient wisdom, applied to the week you are actually having.
+        </p>
+        <div class="mt-8">
+          <NewsletterForm tone="ink" />
+        </div>
+      </div>
+    </div>
   </section>
 </BaseLayout>

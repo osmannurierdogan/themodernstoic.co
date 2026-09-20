@@ -4,8 +4,9 @@
 export const prerender = false;
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import PostCard from '@/components/PostCard.astro';
 import { brandConfig } from '@/config/brand.config';
-import { getPublishedPosts, getPostSlug, getPostCoverUrl } from '@/lib/posts';
+import { getPublishedPosts } from '@/lib/posts';
 
 const allPosts = await getPublishedPosts();
 
@@ -36,16 +37,26 @@ function pageHref(targetPage: number): string {
   title="Essays"
   description={`Essays from ${brandConfig.brandName}${requestedTag ? ` tagged "${requestedTag}"` : ''}.`}
 >
-  <section class="mx-auto max-w-4xl px-6 py-16">
-    <h1 class="text-3xl font-semibold tracking-tight">Essays</h1>
+  <section class="mx-auto max-w-grid px-6 py-section lg:py-section-lg">
+    <header class="border-b border-border pb-8">
+      <p class="eyebrow text-brand">The Archive</p>
+      <h1 class="mt-5 font-heading text-h1 font-semibold">Essays</h1>
+      {requestedTag && (
+        <p class="mt-4 text-muted-foreground">
+          Filtered by <span class="text-brand">{requestedTag}</span>
+        </p>
+      )}
+    </header>
 
     {allTags.length > 0 && (
-      <nav class="mt-6 flex flex-wrap gap-2 text-sm">
+      <nav class="mt-8 flex flex-wrap gap-2" aria-label="Filter by tag">
         <a
           href="/blog"
           class:list={[
-            'rounded-full border px-3 py-1',
-            !requestedTag ? 'border-foreground bg-foreground text-background' : 'border-border text-foreground/70',
+            'eyebrow rounded-full border px-4 py-2 transition-colors',
+            !requestedTag
+              ? 'border-foreground bg-foreground text-background'
+              : 'border-border text-muted-foreground hover:border-border-strong hover:text-brand',
           ]}
         >
           All
@@ -54,8 +65,10 @@ function pageHref(targetPage: number): string {
           <a
             href={`/blog?tag=${encodeURIComponent(tag)}`}
             class:list={[
-              'rounded-full border px-3 py-1',
-              requestedTag === tag ? 'border-foreground bg-foreground text-background' : 'border-border text-foreground/70',
+              'eyebrow rounded-full border px-4 py-2 transition-colors',
+              requestedTag === tag
+                ? 'border-foreground bg-foreground text-background'
+                : 'border-border text-muted-foreground hover:border-border-strong hover:text-brand',
             ]}
           >
             {tag}
@@ -64,36 +77,34 @@ function pageHref(targetPage: number): string {
       </nav>
     )}
 
-    <ul class="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {paginatedPosts.length === 0 && (
-        <p class="text-sm text-foreground/60">No essays found.</p>
-      )}
-      {paginatedPosts.map((post) => {
-        const coverUrl = getPostCoverUrl(post);
-        return (
-          <li>
-            <a href={`/blog/${getPostSlug(post)}`} class="group block">
-              {coverUrl && (
-                <img src={coverUrl} alt={post.data.properties.Title} class="mb-4 w-full rounded-md object-cover aspect-video" />
-              )}
-              <h2 class="text-xl font-medium group-hover:underline">
-                {post.data.properties.Title}
-              </h2>
-              <p class="mt-2 text-sm text-foreground/70">{post.data.properties.Excerpt}</p>
-            </a>
+    {paginatedPosts.length === 0 ? (
+      <p class="mt-12 text-muted-foreground">No essays found.</p>
+    ) : (
+      <ul class="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {paginatedPosts.map((post) => (
+          <li class="h-full">
+            <PostCard post={post} />
           </li>
-        );
-      })}
-    </ul>
+        ))}
+      </ul>
+    )}
 
     {totalPages > 1 && (
-      <nav class="mt-12 flex items-center justify-center gap-4 text-sm">
-        {currentPage > 1 && (
-          <a href={pageHref(currentPage - 1)} rel="prev" class="hover:underline">&larr; Previous</a>
+      <nav class="mt-16 flex items-center justify-between gap-4 border-t border-border pt-8">
+        {currentPage > 1 ? (
+          <a href={pageHref(currentPage - 1)} rel="prev" class="eyebrow text-brand hover:opacity-70">
+            &larr; Previous
+          </a>
+        ) : (
+          <span></span>
         )}
-        <span class="text-foreground/60">Page {currentPage} of {totalPages}</span>
-        {currentPage < totalPages && (
-          <a href={pageHref(currentPage + 1)} rel="next" class="hover:underline">Next &rarr;</a>
+        <span class="eyebrow">Page {currentPage} of {totalPages}</span>
+        {currentPage < totalPages ? (
+          <a href={pageHref(currentPage + 1)} rel="next" class="eyebrow text-brand hover:opacity-70">
+            Next &rarr;
+          </a>
+        ) : (
+          <span></span>
         )}
       </nav>
     )}
