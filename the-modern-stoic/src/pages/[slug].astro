@@ -1,6 +1,8 @@
 ---
 import { render } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import Artwork from '@/components/Artwork.astro';
+import { getFallbackArtwork } from '@/config/artwork';
 import { getSitePages } from '@/lib/pages';
 
 export async function getStaticPaths() {
@@ -11,15 +13,42 @@ export async function getStaticPaths() {
   }));
 }
 
+/**
+ * Policy pages stay plain text. A Roman bust above a cookie policy reads as
+ * decoration in a place where readers want the words and nothing else.
+ */
+const PLAIN_PAGE_SLUGS = new Set([
+  'privacy-policy',
+  'cookie-policy',
+  'terms',
+  'terms-of-service',
+  'imprint',
+  'disclaimer',
+]);
+
 const { page } = Astro.props;
-const { Title, MetaDescription } = page.data.properties;
+const { Title, MetaDescription, Slug } = page.data.properties;
 const { Content } = await render(page);
+
+const headerArtwork = PLAIN_PAGE_SLUGS.has(Slug) ? undefined : getFallbackArtwork(Slug);
 ---
 
 <BaseLayout title={Title} description={MetaDescription || Title}>
   <article class="mx-auto max-w-article px-6 py-section lg:py-section-lg">
     <h1 class="font-heading text-h1 font-semibold">{Title}</h1>
     <div class="mt-8 h-px w-full bg-border"></div>
+
+    {headerArtwork && (
+      <Artwork
+        item={headerArtwork}
+        aspect="16/9"
+        displayWidth={720}
+        sizes="(min-width: 768px) 720px, 100vw"
+        priority
+        class="mt-12"
+      />
+    )}
+
     <div class="prose prose-brand mt-12">
       <Content />
     </div>

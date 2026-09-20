@@ -4,7 +4,9 @@
 export const prerender = false;
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import Artwork from '@/components/Artwork.astro';
 import PostCard from '@/components/PostCard.astro';
+import { artwork } from '@/config/artwork';
 import { brandConfig } from '@/config/brand.config';
 import { getPublishedPosts } from '@/lib/posts';
 
@@ -38,14 +40,28 @@ function pageHref(targetPage: number): string {
   description={`Essays from ${brandConfig.brandName}${requestedTag ? ` tagged "${requestedTag}"` : ''}.`}
 >
   <section class="mx-auto max-w-grid px-6 py-section lg:py-section-lg">
-    <header class="border-b border-border pb-8">
-      <p class="eyebrow text-brand">The Archive</p>
-      <h1 class="mt-5 font-heading text-h1 font-semibold">Essays</h1>
-      {requestedTag && (
-        <p class="mt-4 text-muted-foreground">
-          Filtered by <span class="text-brand">{requestedTag}</span>
+    <header class="grid items-end gap-10 border-b border-border pb-8 md:grid-cols-[1fr_auto]">
+      <div>
+        <p class="eyebrow text-brand">The Archive</p>
+        <h1 class="mt-5 font-heading text-h1 font-semibold">Essays</h1>
+        <p class="mt-5 max-w-lg text-lg leading-relaxed text-muted-foreground">
+          Every essay published so far, newest first. Filter by theme below.
         </p>
-      )}
+        {requestedTag && (
+          <p class="mt-4 text-muted-foreground">
+            Filtered by <span class="text-brand">{requestedTag}</span>
+          </p>
+        )}
+      </div>
+
+      <Artwork
+        item={artwork.aPhilosopher}
+        aspect="4/5"
+        displayWidth={240}
+        sizes="240px"
+        priority
+        class="hidden w-60 md:block"
+      />
     </header>
 
     {allTags.length > 0 && (

@@ -1,0 +1,25 @@
+---
+import { Image } from 'astro:assets';
+import logo from '@/assets/logo.png';
+import { brandConfig } from '@/config/brand.config';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+
+// The source is 2000px wide but never renders above ~128 CSS px. Serving 1x/2x
+// of the displayed size instead of the original turns a 150KB PNG into a few KB.
+const DISPLAY_WIDTH = 128;
+---
+
+<Image
+  src={logo}
+  alt={brandConfig.brandName}
+  widths={[DISPLAY_WIDTH, DISPLAY_WIDTH * 2]}
+  sizes={`${DISPLAY_WIDTH}px`}
+  loading="eager"
+  decoding="sync"
+  class:list={['h-9 w-auto', className]}
+/>

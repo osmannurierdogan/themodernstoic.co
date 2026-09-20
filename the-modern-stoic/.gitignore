@@ -1,4 +1,13 @@
+# Build output
+dist/
+
 # Local Netlify folder
 .netlify
 ../node_modules
 .env
+
+# Post covers, downloaded from Notion by `scripts/sync-notion-covers.mjs` on
+# every build. Regenerated, not authored — and a committed 1MB PNG per post
+# would bloat history. If Notion is unreachable at build time the site falls
+# back to the public-domain artwork in src/assets/artwork/.
+src/assets/covers/

@@ -28,6 +28,7 @@
   },
   "files": [
     "bin",
+    "scripts",
     "src",
     "public",
     "astro.config.mjs",
@@ -37,7 +38,8 @@
   ],
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "sync:covers": "node scripts/sync-notion-covers.mjs",
+    "build": "node scripts/sync-notion-covers.mjs && astro build",
     "preview": "astro preview",
     "check": "astro check",
     "astro": "astro"

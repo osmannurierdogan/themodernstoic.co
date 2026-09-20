@@ -1,4 +1,5 @@
 ---
+import Logo from '@/components/Logo.astro';
 import { brandConfig } from '@/config/brand.config';
 import { getNavPages } from '@/lib/pages';
 
@@ -13,7 +14,7 @@ const linkClass = 'text-sm text-muted-foreground transition-colors hover:text-br
   <div class="mx-auto max-w-grid px-6 py-16">
     <div class="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr]">
       <div class="max-w-xs">
-        <img src={brandConfig.logo} alt={brandConfig.brandName} class="h-9 w-auto" />
+        <Logo />
         <p class="mt-5 text-sm leading-relaxed text-muted-foreground">
           {brandConfig.tagline}
         </p>

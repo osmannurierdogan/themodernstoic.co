@@ -1,17 +1,23 @@
 ---
+import { Image } from 'astro:assets';
 import { brandConfig } from '@/config/brand.config';
-import { getPostSlug, getPostCoverUrl, type PostEntry } from '@/lib/posts';
+import { getPostSlug, getPostImage, type PostEntry } from '@/lib/posts';
 
 interface Props {
   post: PostEntry;
   /** `lead` gives the card a wider image well and a larger title. */
   size?: 'default' | 'lead';
+  /**
+   * Set on the first card above the fold so its image is the eagerly loaded
+   * LCP candidate. Everything below the fold stays lazy.
+   */
+  priority?: boolean;
 }
 
-const { post, size = 'default' } = Astro.props;
+const { post, size = 'default', priority = false } = Astro.props;
 
 const { Title, Excerpt, PublishDate, Tags } = post.data.properties;
-const coverUrl = getPostCoverUrl(post);
+const image = getPostImage(post);
 const href = `/blog/${getPostSlug(post)}`;
 const isLead = size === 'lead';
 
@@ -26,14 +32,18 @@ const publishDateLabel = publishDateIso
 
 const primaryTag = Tags?.[0];
 
-// Monogram for the no-cover fallback, so a coverless post still occupies the
-// same vertical space and the grid row stays aligned.
-const monogram = brandConfig.brandName
-  .split(' ')
-  .map((word) => word[0])
-  .join('')
-  .slice(0, 3)
-  .toUpperCase();
+// Cards are at most ~420px wide in the 3-up grid and ~640px as a lead. Cropping
+// to the card's ratio here, rather than with CSS `object-cover`, means a square
+// Notion cover does not ship the third of its height the card never shows.
+const displayWidth = isLead ? 640 : 420;
+const width = Math.min(displayWidth, image.src.width);
+const height = Math.round(width / (isLead ? 16 / 9 : 3 / 2));
+
+// w descriptors, not x descriptors: the card is full-bleed on a phone and a
+// third of the grid on a desktop, so `sizes` has to be able to choose.
+const maxWidth = Math.min(image.src.width, displayWidth * 2);
+const widths = [...new Set([400, 640, 960, 1280].filter((w) => w <= maxWidth).concat(maxWidth))]
+  .sort((a, b) => a - b);
 ---
 
 <article class="h-full">
@@ -41,22 +51,25 @@ const monogram = brandConfig.brandName
     href={href}
     class="group flex h-full flex-col overflow-hidden rounded-md border border-border bg-surface transition-colors duration-200 hover:border-border-strong"
   >
-    <div class={`relative overflow-hidden ${isLead ? 'aspect-[16/9]' : 'aspect-[3/2]'}`}>
-      {coverUrl ? (
-        <img
-          src={coverUrl}
-          alt={Title}
-          loading="lazy"
-          decoding="async"
-          class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-        />
-      ) : (
-        <div class="flex h-full w-full items-center justify-center bg-panel">
-          <span class="font-heading text-2xl tracking-[0.2em] text-brand-soft" aria-hidden="true">
-            {monogram}
-          </span>
-        </div>
-      )}
+    <div class="relative overflow-hidden">
+      <Image
+        src={image.src}
+        alt={image.alt}
+        width={width}
+        height={height}
+        fit="cover"
+        position="center"
+        widths={widths}
+        sizes={
+          isLead
+            ? '(min-width: 1024px) 640px, 100vw'
+            : '(min-width: 1024px) 420px, (min-width: 768px) 50vw, 100vw'
+        }
+        loading={priority ? 'eager' : 'lazy'}
+        decoding={priority ? 'sync' : 'async'}
+        fetchpriority={priority ? 'high' : 'auto'}
+        class="h-auto w-full transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+      />
     </div>
 
     <div class={`flex flex-1 flex-col ${isLead ? 'p-7' : 'p-6'}`}>

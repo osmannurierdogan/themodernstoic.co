@@ -1,0 +1,87 @@
+---
+import { Image } from 'astro:assets';
+import { formatArtworkCredit, type Artwork } from '@/config/artwork';
+
+interface Props {
+  item: Artwork;
+  /** Crop shape. The source files are portrait or landscape, never square. */
+  aspect?: '16/9' | '3/2' | '4/5' | '21/9';
+  /**
+   * Widest the image is ever displayed, in CSS pixels. Drives the generated
+   * width and height, so a thumbnail never downloads a 2000px file.
+   */
+  displayWidth: number;
+  /** Responsive `sizes`. Defaults to `displayWidth` at a fixed size. */
+  sizes?: string;
+  /** Set on the LCP image only — one eager image per page, at most. */
+  priority?: boolean;
+  /** Hides the caption but keeps the alt text; for decorative band images. */
+  hideCaption?: boolean;
+  class?: string;
+}
+
+const {
+  item,
+  aspect = '16/9',
+  displayWidth,
+  sizes,
+  priority = false,
+  hideCaption = false,
+  class: className,
+} = Astro.props;
+
+const RATIOS = { '16/9': 16 / 9, '3/2': 3 / 2, '4/5': 4 / 5, '21/9': 21 / 9 };
+
+// Crop to the display ratio on the server rather than with CSS `object-cover`.
+// A CSS crop still downloads the full height of the source — for the 21/9 hero
+// that is roughly half the bytes thrown away after the transfer.
+const width = Math.min(displayWidth, item.src.width);
+const height = Math.round(width / RATIOS[aspect]);
+
+// `widths` (w descriptors) rather than `densities` (x descriptors), because a
+// srcset of x descriptors makes the browser ignore `sizes` — a phone would then
+// pull the 2x desktop file for a 390px-wide slot.
+const CANDIDATES = [400, 640, 960, 1280, 1600, 2000];
+const maxWidth = Math.min(item.src.width, displayWidth * 2);
+const widths = [...new Set([...CANDIDATES.filter((w) => w <= maxWidth), maxWidth])].sort(
+  (a, b) => a - b,
+);
+
+const credit = formatArtworkCredit(item);
+---
+
+<figure class:list={['m-0', className]}>
+  <div class="overflow-hidden rounded-md bg-panel">
+    <Image
+      src={item.src}
+      alt={item.alt}
+      width={width}
+      height={height}
+      fit="cover"
+      position="center"
+      widths={widths}
+      sizes={sizes ?? `${displayWidth}px`}
+      loading={priority ? 'eager' : 'lazy'}
+      decoding={priority ? 'sync' : 'async'}
+      fetchpriority={priority ? 'high' : 'auto'}
+      class="h-auto w-full"
+    />
+  </div>
+
+  {!hideCaption && (
+    <figcaption class="mt-3 text-xs leading-relaxed text-muted-foreground">
+      <cite class="not-italic">{item.title}</cite>
+      {credit && <span>, {credit}</span>}
+      <span aria-hidden="true"> &middot; </span>
+      <a
+        href={item.sourceUrl}
+        class="underline underline-offset-2 transition-colors hover:text-brand"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        {item.collection}
+      </a>
+      <span> ({item.license})</span>
+    </figcaption>
+  )}
+</figure>

@@ -1,12 +1,21 @@
 ---
-import '@fontsource/inter/400.css';
-import '@fontsource/inter/500.css';
-import '@fontsource/inter/600.css';
-import '@fontsource-variable/fraunces';
-import '@fontsource/source-serif-4/400.css';
-import '@fontsource/source-serif-4/400-italic.css';
-import '@fontsource/source-serif-4/600.css';
+// Latin subsets only, and Fraunces' `wght` axis rather than the full variable
+// font: the site never sets optical size, softness or wonk, and the full face
+// is 118KB against 36KB for the axis we actually animate.
+import '@fontsource/inter/latin-400.css';
+import '@fontsource/inter/latin-500.css';
+import '@fontsource/inter/latin-600.css';
+import '@fontsource-variable/fraunces/wght.css';
+import '@fontsource/source-serif-4/latin-400.css';
+import '@fontsource/source-serif-4/latin-400-italic.css';
+import '@fontsource/source-serif-4/latin-600.css';
 import '@/styles/global.css';
+
+// The two faces that render above the fold. Preloading them removes a round
+// trip from the LCP path — without it the browser only discovers the font
+// after parsing the stylesheet.
+import frauncesWght from '@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2?url';
+import interRegular from '@fontsource/inter/files/inter-latin-400-normal.woff2?url';
 import { brandConfig } from '@/config/brand.config';
 import SEO from '@/components/SEO.astro';
 import AnalyticsScripts from '@/components/AnalyticsScripts.astro';
@@ -24,6 +33,12 @@ interface Props {
 
 const { title, description, ogImage, jsonLd, noindex } = Astro.props;
 const { colors, fonts } = brandConfig.theme;
+
+// Only warm up Google's origins when a tag is actually configured — an unused
+// preconnect is a wasted connection, and Lighthouse flags it as one.
+const analyticsEnabled = Boolean(
+  brandConfig.analytics.ga4Id || brandConfig.analytics.gtmId,
+);
 
 // Every shadcn token is assigned here, not just a handful. Anything left out
 // falls back to shadcn's neutral-gray defaults in global.css and renders cold
@@ -70,6 +85,15 @@ const brandStyles = `:root {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href={brandConfig.theme.faviconUrl} />
+    <meta name="theme-color" content={colors.background} />
+    <link rel="preload" as="font" type="font/woff2" href={frauncesWght} crossorigin="anonymous" />
+    <link rel="preload" as="font" type="font/woff2" href={interRegular} crossorigin="anonymous" />
+    {analyticsEnabled && (
+      <>
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://www.google-analytics.com" crossorigin="anonymous" />
+      </>
+    )}
     <SEO title={title} description={description} ogImage={ogImage} jsonLd={jsonLd} noindex={noindex} />
     <AnalyticsScripts />
     <style set:html={brandStyles} />

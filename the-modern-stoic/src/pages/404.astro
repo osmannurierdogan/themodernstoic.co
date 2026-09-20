@@ -1,11 +1,33 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import Artwork from '@/components/Artwork.astro';
+import { artwork } from '@/config/artwork';
 ---
 
 <BaseLayout title="Page not found" description="The page you're looking for doesn't exist." noindex>
-  <section class="mx-auto flex max-w-xl flex-col items-center px-6 py-32 text-center">
-    <h1 class="text-4xl font-semibold">404</h1>
-    <p class="mt-4 text-foreground/70">The page you're looking for doesn't exist.</p>
-    <a href="/" class="mt-8 underline">Back to home</a>
+  <section class="mx-auto max-w-2xl px-6 py-section text-center lg:py-section-lg">
+    <p class="eyebrow text-brand">404</p>
+    <h1 class="mt-6 font-heading text-h1 font-semibold">This page is not here</h1>
+    <p class="mx-auto mt-6 max-w-md text-lg leading-relaxed text-muted-foreground">
+      &ldquo;Everything that exists is already fraying at the edges.&rdquo; Marcus
+      would not have been surprised by a dead link either.
+    </p>
+
+    <Artwork
+      item={artwork.romanSarcophagus}
+      aspect="21/9"
+      displayWidth={672}
+      sizes="(min-width: 768px) 672px, 100vw"
+      class="mt-12 text-left"
+    />
+
+    <div class="mt-12 flex flex-wrap justify-center gap-6">
+      <a href="/" class="eyebrow text-brand transition-opacity hover:opacity-70">
+        &larr; Back to home
+      </a>
+      <a href="/blog" class="eyebrow text-brand transition-opacity hover:opacity-70">
+        Browse the essays
+      </a>
+    </div>
   </section>
 </BaseLayout>

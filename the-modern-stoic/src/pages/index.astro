@@ -1,7 +1,9 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import Artwork from '@/components/Artwork.astro';
 import NewsletterForm from '@/components/NewsletterForm.astro';
 import PostCard from '@/components/PostCard.astro';
+import { artwork } from '@/config/artwork';
 import { brandConfig } from '@/config/brand.config';
 import { getPublishedPosts } from '@/lib/posts';
 
@@ -44,6 +46,19 @@ const jsonLd = [
       </p>
       <div class="mt-10 h-px w-24 bg-brand-soft"></div>
     </div>
+
+    <!--
+      The page's LCP element. Loaded eagerly at high priority; every other
+      image on the page stays lazy so they do not compete for bandwidth.
+    -->
+    <Artwork
+      item={artwork.ruinsOfAnAncientCity}
+      aspect="21/9"
+      displayWidth={1200}
+      sizes="(min-width: 1280px) 1200px, 100vw"
+      priority
+      class="mt-16"
+    />
   </section>
 
   <!-- Latest essays -->

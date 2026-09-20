@@ -99,7 +99,7 @@ export const brandConfig: BrandConfig = {
       body: "Inter",
       serifBody: "Source Serif 4"
     },
-    logoUrl: "/logo.svg",
+    logoUrl: "/logo.png",
     faviconUrl: "/favicon.svg"
   },
 
@@ -124,7 +124,7 @@ export const brandConfig: BrandConfig = {
   social: {},
 
   seo: {
-    defaultOgImage: "/og-image.png"
+    defaultOgImage: "/og-image.jpg"
   }
 };
 

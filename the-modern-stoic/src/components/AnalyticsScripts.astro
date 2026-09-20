@@ -2,6 +2,46 @@
 import { brandConfig } from '@/config/brand.config';
 
 const { gtmId, ga4Id, metaPixelId } = brandConfig.analytics;
+
+/**
+ * Tag scripts are loaded after the `load` event rather than during parse.
+ *
+ * Google's tags are the heaviest thing on the page by a wide margin — roughly
+ * 300KB of JavaScript and half a second of main-thread work on a mid-range
+ * phone. Run in the critical path they cost ~25 Lighthouse performance points.
+ *
+ * They still load on their own, with no interaction required, so Google's tag
+ * detection and Tag Assistant continue to see them. `requestIdleCallback` has a
+ * timeout, and a `setTimeout` fallback covers Safari, so the tag always fires.
+ */
+const deferredLoader = `
+(function () {
+  var loaded = false;
+  function load() {
+    if (loaded) return;
+    loaded = true;
+    __TAGS__
+  }
+  function schedule() {
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(load, { timeout: 3000 });
+    } else {
+      setTimeout(load, 1500);
+    }
+  }
+  if (document.readyState === 'complete') schedule();
+  else window.addEventListener('load', schedule, { once: true });
+})();
+`;
+
+function withTags(body: string): string {
+  return deferredLoader.replace('__TAGS__', body);
+}
+
+function injectScript(src: string): string {
+  return `var s = document.createElement('script'); s.async = true; s.src = '${src}';
+    document.head.appendChild(s);`;
+}
 ---
 
 {(gtmId || ga4Id) && (
@@ -13,25 +53,22 @@ const { gtmId, ga4Id, metaPixelId } = brandConfig.analytics;
 )}
 
 {gtmId && (
-  <script is:inline set:html={`
-    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');
-  `} />
+  <script is:inline set:html={withTags(`
+    window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+    ${injectScript(`https://www.googletagmanager.com/gtm.js?id=${gtmId}`)}
+  `)} />
 )}
 
 {ga4Id && (
-  <>
-    <script is:inline src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}></script>
-    <script is:inline set:html={`
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '${ga4Id}', { anonymize_ip: true });
-    `} />
-  </>
+  <script is:inline set:html={withTags(`
+    ${injectScript(`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`)}
+    gtag('js', new Date());
+    gtag('config', '${ga4Id}', { anonymize_ip: true });
+  `)} />
 )}
 
 {metaPixelId && (
-  <script is:inline set:html={`
+  <script is:inline set:html={withTags(`
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
     n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -42,5 +79,5 @@ const { gtmId, ga4Id, metaPixelId } = brandConfig.analytics;
     'https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', '${metaPixelId}');
     fbq('track', 'PageView');
-  `} />
+  `)} />
 )}
